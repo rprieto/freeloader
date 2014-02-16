@@ -11,29 +11,30 @@ Just a super easy load-testing framework.
 
 ## Getting started
 
-`freeloader` comes with 4 basic keywords you can use to build your test:
+Freeloader comes with 4 basic keywords:
 
-- `request` to create an HTTP request using [unirest](https://github.com/mashape/unirest-nodejs). This supports many options like settings headers, adding a JSON payload, uploading a file, etc...
+- `request` to create an HTTP request using [unirest](https://github.com/mashape/unirest-nodejs)
 - `emit` to push the request down the pipeline
 - `send` to make the actualy HTTP call
 - `join` to join 2 streams together
 
-These keywords are accessible as `require('freeloader').keyword` but you can also use `require('freeloader').global()` which puts all 4 in the global scope.
+These keywords are accessible as `require('freeloader').keyword` but you can also use `require('freeloader').global()` which puts all of them in global scope.
 
 ```js
 require('freeloader').global();
 
+// See unirest documentation for all the options (headers, file uploads...)
 var r = request.get('http://localhost:3000/people')
                .header('Accept: application/json');
 
 emit(r).pipe(send());
 ```
 
-That's it! This test will send a single HTTP request, and finish as soon as the response is received.
+That's it! This test sends a single HTTP request, and finishes as soon as the response is received.
 
 ## Building a pipeline
 
-It becomes a lot more interesting when we start building a [Stream](http://nodejs.org/api/stream.html) pipeline from all the available modules. For example:
+It becomes a lot more interesting when we start building a [Stream](http://nodejs.org/api/stream.html) pipeline. For example:
 
 ```js
 emit(r)
@@ -45,23 +46,21 @@ emit(r)
 .pipe(send())
 ```
 
-Each module in the pipeline has acess to the requests & responses. They can for example modify a request payload, generate more requests, or collect data for reporting.
+Each module in the pipeline has acess to the requests & responses. For example they can modify a request payload, generate more requests, or collect data for reporting.
 
-In this example, the `concurrent` module will keep making requests in parallel. Each request will be slightly modified by the `transform` module. The `consoleSummary` and `responseTimeGraph` will generating nice reports at the end.
+The test suite will end:
 
-## When does a test end?
-
-By default, a test ends when every request has received a response.
-
-Since some modules continuously generate requests, `freeloader` also shuts down the whole pipeline gracefully when you press `Ctrl-C`, so reporters can generate stats with every request/response received up to that point.
-
-Some modules also add their own stopping conditions, like the `stopTimer` module.
+- when every request has received a response
+- or when you press `Ctrl-C`
+- or when a module adds its own stopping condition
 
 ## All the modules
 
-`freeloader` comes with a few built-in streams, which can be roughly divided into 3 categories:
+`freeloader` has a few modules built-in. Each module is an instance of a Node.js [Stream](http://nodejs.org/api/stream.html), so you can also easily create your own.
 
-**Emitters**, which can generate 1 or more requests from the single `emit()` call. You'll usually use 1 emitter only, but some support being combined together.
+They're roughly divided into 3 categories:
+
+**Emitters**, which generate 1 or more requests from their input. You'll usually use 1 emitter only, but some support being combined together.
 
 - `times(5)` to fire 5 requests instead of a single one
 - `perSecond(10)` to generate 10 requests per second
@@ -78,11 +77,9 @@ Some modules also add their own stopping conditions, like the `stopTimer` module
 - `print()` to troubleshoot the request/response flow
 - `consoleSummary()` to print general stats in the console
 
-Each module in the pipeline is a Node.js stream, so you can of course create your own.
-
 ## Joining streams
 
-Streams can be joined for more complex scenarios. Where you decide to join the streams will affect the exact behaviour. Here are a few examples:
+Streams can also be joined for more complex scenarios. Here are a few examples:
 
 - Emit 2 different requests, and send 50 of each
 
@@ -92,7 +89,7 @@ join(emit(r1), emit(r2))
 .pipe(send());
 ```
 
-- Emit 2 different requests continuously, with a total concurrency of 50
+- Emit 2 different requests with a total concurrency of 50
 
 ```js
 join(emit(r1), emit(r2))
@@ -100,7 +97,7 @@ join(emit(r1), emit(r2))
 .pipe(send());
 ```
 
-- Emit 2 different requests continuously, with a concurrency of 50 each
+- Emit 2 different requests with a concurrency of 50 each
 
 ```js
 var s1 = emit(r1).pipe(concurrent(50));
@@ -116,4 +113,4 @@ join(emit(r1), emit(r2))
 .pipe(send());
 ```
 
-Note that the reporters get access to each request/response, including the URL. Some reporters will only report on the total activity (e.g. average response time), but some will group the requests by URL to give more granular graphs or reporting.
+Note that reporters get access to each request/response, including the URL. It's up to each reporter to either give global stats, or group the report by request.
