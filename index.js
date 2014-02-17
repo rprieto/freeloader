@@ -33,6 +33,7 @@ exports.streams = {
 
   // stop conditions
   stopTimer:      require('./lib/streams/stop-timer'),
+  stopCount:      require('./lib/streams/stop-count'),
 
   // reporters
   progressDots:   require('./lib/streams/progress-dots'),
