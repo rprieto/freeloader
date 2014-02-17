@@ -9,20 +9,22 @@
     "load",
     "test",
     "testing",
+    "performance",
     "ab",
     "jmeter",
     "streams"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rprieto/freeloader.git"
+  },
   "main": "index.js",
   "scripts": {
     "test": "./node_modules/.bin/mocha"
   },
   "dependencies": {
     "q": "~1.0.0",
-    "lodash": "~2.4.1",
-    "unirest": "~0.1.1",
-    "ms": "~0.6.2",
-    "fast-stats": "0.0.2"
+    "unirest": "~0.1.1"
   },
   "devDependencies": {
     "mocha": "~1.17.1",

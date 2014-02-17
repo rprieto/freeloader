@@ -18,8 +18,6 @@ Freeloader comes with 4 basic keywords:
 - `send` to make the actual HTTP call
 - `join` to join 2 streams together
 
-These keywords are accessible as `require('freeloader').keyword` but you can also use `require('freeloader').global()` which puts all of them in global scope.
-
 ```js
 require('freeloader').global();
 
@@ -34,24 +32,28 @@ That's it! This test sends a single HTTP request, and finishes as soon as the re
 
 ## Building a pipeline
 
-It becomes a lot more interesting when we start building a [Stream](http://nodejs.org/api/stream.html) pipeline. For example:
+It becomes a lot more interesting when we start building a pipeline. Each step in the pipeline has access to all requests & responses. For example, they can modify payloads, generate more requests, or collect data for reporting.
+
+[freeloader-bundle](http://github.com/rprieto/freeloader-bundle) contains a lot of useful modules to get started. See the bundle [README](http://github.com/rprieto/freeloader-bundle/blog/master/README) for detailled examples. Each module is an instance of a Node.js [Stream](http://nodejs.org/api/stream.html), so you can also easily create your own.
 
 ```js
+require('freeloader-bundle').global();
+
 emit(r)
 .pipe(stopTimer('30s'))
 .pipe(concurrent(50))
 .pipe(transform(randomData))
+.pipe(progressDots())
 .pipe(consoleSummary())
 .pipe(responseTimeGraph('./graph.jpg'))
 .pipe(send())
 ```
 
-Which outputs:
+Which outputs something like:
 
 ```bash
 ..........................................................................................................................
 
-Shutting down.
 Waiting for pending requests to finish...
 
 Response count =  377
@@ -60,8 +62,6 @@ Response times
   avg =  44ms
   max =  82ms
 ```
-
-Each module in the pipeline has acess to the requests & responses. For example they can modify a request payload, generate more requests, or collect data for reporting.
 
 The test suite will end:
 
@@ -92,28 +92,4 @@ join(s1, s2)
 .pipe(send());
 ```
 
-Note that reporters get access to each request/response, including the URL. It's up to each reporter to either give global stats, or group the report by request.
-
-## So what modules can I use?
-
-Freeloader has a few modules built-in, accessible as `require('freeloader').streams[name]`. They're roughly divided into 3 categories:
-
-**Emitters**, which generate 1 or more requests from their input. You'll usually use 1 emitter only, but some support being combined together.
-
-- `times(5)` : fire 5 requests instead of a single one
-- `perSecond(10)` : generate 10 requests per second
-- `concurrent(50)` : always maintain 50 requests in flight
-- `transform(fn)` : apply the given function to each request
-
-**Stop conditions**, which force the whole pipeline to stop.
-
-- `stopTimer('10s')` : stop after 10 seconds
-- `stopCount(50)` : stop after 50 responses have been received
-
-**Reporters**, that analyse requests and responses to generate reports and statistics. You can pipe several reporters one after the other.
-
-- `progressDots()` : print a dot for each request sent
-- `print()` : print every request/response going through
-- `consoleSummary()` : print general stats to the console
-
-Each module is an instance of a Node.js [Stream](http://nodejs.org/api/stream.html), so you can also easily create your own.
+It's up to each reporter to either give global stats, or group the report by request URL.

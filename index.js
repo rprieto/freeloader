@@ -1,6 +1,6 @@
 
 //
-// the 4 basic operations
+// The 4 basic operations
 //
 
 exports.request = require('./lib/request');
@@ -9,7 +9,7 @@ exports.send    = require('./lib/send');
 exports.join    = require('./lib/join');
 
 //
-// make basic operations global
+// Helper to add them to global scope
 //
 
 exports.global = function() {
@@ -18,26 +18,3 @@ exports.global = function() {
   global.send    = exports.send;
   global.join    = exports.join;
 }
-
-//
-// built-in streams
-// (maybe these should be separate modules down the line)
-//
-
-exports.streams = {
-
-  // emitters
-  times:          require('./lib/streams/times'),
-  perSecond:      require('./lib/streams/per-second'),
-  transform:      require('./lib/streams/transform'),
-
-  // stop conditions
-  stopTimer:      require('./lib/streams/stop-timer'),
-  stopCount:      require('./lib/streams/stop-count'),
-
-  // reporters
-  progressDots:   require('./lib/streams/progress-dots'),
-  print:          require('./lib/streams/print'),
-  consoleSummary: require('./lib/streams/console-summary'),
-
-};
