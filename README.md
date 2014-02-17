@@ -46,6 +46,21 @@ emit(r)
 .pipe(send())
 ```
 
+Which outputs:
+
+```bash
+..........................................................................................................................
+
+Shutting down.
+Waiting for pending requests to finish...
+
+Response count =  377
+Response times
+  min =  16ms
+  avg =  44ms
+  max =  82ms
+```
+
 Each module in the pipeline has acess to the requests & responses. For example they can modify a request payload, generate more requests, or collect data for reporting.
 
 The test suite will end:
