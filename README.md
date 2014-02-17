@@ -15,7 +15,7 @@ Freeloader comes with 4 basic keywords:
 
 - `request` to create an HTTP request using [unirest](https://github.com/mashape/unirest-nodejs)
 - `emit` to push the request down the pipeline
-- `send` to make the actualy HTTP call
+- `send` to make the actual HTTP call
 - `join` to join 2 streams together
 
 These keywords are accessible as `require('freeloader').keyword` but you can also use `require('freeloader').global()` which puts all of them in global scope.
@@ -25,7 +25,7 @@ require('freeloader').global();
 
 // See unirest documentation for all the options (headers, file uploads...)
 var r = request.get('http://localhost:3000/people')
-               .header('Accept: application/json');
+               .header('Accept', 'application/json');
 
 emit(r).pipe(send());
 ```
@@ -54,46 +54,16 @@ The test suite will end:
 - or when you press `Ctrl-C`
 - or when a module adds its own stopping condition
 
-## All the modules
-
-`freeloader` has a few modules built-in. Each module is an instance of a Node.js [Stream](http://nodejs.org/api/stream.html), so you can also easily create your own.
-
-They're roughly divided into 3 categories:
-
-**Emitters**, which generate 1 or more requests from their input. You'll usually use 1 emitter only, but some support being combined together.
-
-- `times(5)` to fire 5 requests instead of a single one
-- `perSecond(10)` to generate 10 requests per second
-- `concurrent(50)` to always maintain 50 requests in flight
-- `transform(fn)` which apply the given function to each request
-
-**Stop conditions**, which force the pipeline to stop. A currently limitation is that these have to be placed just after `emit()` to cut the pipeline at the source.
-
-- `stopTimer('10s')` to stop after 10 seconds
-
-**Reporters**, that analyse requests and responses to generate reports and statistics. You can pipe several reporters one after the other.
-
-- `progressDots()` which prints a dot for each request sent
-- `print()` to troubleshoot the request/response flow
-- `consoleSummary()` to print general stats in the console
-
 ## Joining streams
 
 Streams can also be joined for more complex scenarios. Here are a few examples:
-
-- Emit 2 different requests, and send 50 of each
-
-```js
-join(emit(r1), emit(r2))
-.pipe(times(50))
-.pipe(send());
-```
 
 - Emit 2 different requests with a total concurrency of 50
 
 ```js
 join(emit(r1), emit(r2))
 .pipe(concurrent(50))
+.pipe(summary())
 .pipe(send());
 ```
 
@@ -102,15 +72,33 @@ join(emit(r1), emit(r2))
 ```js
 var s1 = emit(r1).pipe(concurrent(50));
 var s2 = emit(r2).pipe(concurrent(50));
-join(s1, s2).pipe(send());
-```
-
-- Get the summary for 2 different requests
-
-```js
-join(emit(r1), emit(r2))
+join(s1, s2)
 .pipe(summary())
 .pipe(send());
 ```
 
 Note that reporters get access to each request/response, including the URL. It's up to each reporter to either give global stats, or group the report by request.
+
+## So what modules can I use?
+
+Freeloader has a few modules built-in, accessible as `require('freeloader').streams[name]`. They're roughly divided into 3 categories:
+
+**Emitters**, which generate 1 or more requests from their input. You'll usually use 1 emitter only, but some support being combined together.
+
+- `times(5)` : fire 5 requests instead of a single one
+- `perSecond(10)` : generate 10 requests per second
+- `concurrent(50)` : always maintain 50 requests in flight
+- `transform(fn)` : apply the given function to each request
+
+**Stop conditions**, which force the whole pipeline to stop.
+
+- `stopTimer('10s')` : stop after 10 seconds
+- `stopCount(50)` : stop after 50 responses have been received
+
+**Reporters**, that analyse requests and responses to generate reports and statistics. You can pipe several reporters one after the other.
+
+- `progressDots()` : print a dot for each request sent
+- `print()` : print every request/response going through
+- `consoleSummary()` : print general stats to the console
+
+Each module is an instance of a Node.js [Stream](http://nodejs.org/api/stream.html), so you can also easily create your own.
