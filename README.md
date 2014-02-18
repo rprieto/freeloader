@@ -7,16 +7,18 @@ Just a super easy load-testing framework.
 - easy to plug-in to your CI server
 - get started in seconds
 
-[![NPM](https://nodei.co/npm/freeloader.svg?compact=true)](http://www.npmjs.org/package/freeloader)
+[![NPM](https://nodei.co/npm/freeloader.svg)](http://www.npmjs.org/package/freeloader)
 
 ## Getting started
 
-Freeloader comes with 4 basic keywords:
+Freeloader uses 4 basic keywords:
 
 - `request` to create an HTTP request using [unirest](https://github.com/mashape/unirest-nodejs)
 - `emit` to push the request down the pipeline
 - `send` to make the actual HTTP call
 - `join` to join 2 streams together
+
+The simplest test looks like:
 
 ```js
 require('freeloader').global();
@@ -32,9 +34,9 @@ That's it! This test sends a single HTTP request, and finishes as soon as the re
 
 ## Building a pipeline
 
-It becomes a lot more interesting when we start building a pipeline. Each step in the pipeline has access to all requests & responses. For example, they can modify payloads, generate more requests, or collect data for reporting.
+It becomes a lot more interesting when we start building a pipeline. Each step in the pipeline has access to all requests & responses. They can modify payloads, generate more requests, or collect data for reporting.
 
-[freeloader-bundle](http://github.com/rprieto/freeloader-bundle) contains a lot of useful modules to get started. See the bundle [README](http://github.com/rprieto/freeloader-bundle/blog/master/README) for detailled examples. Each module is an instance of a Node.js [Stream](http://nodejs.org/api/stream.html), so you can also easily create your own.
+[freeloader-bundle](http://github.com/rprieto/freeloader-bundle) contains a lot of useful modules to get started. Each module is an instance of a Node.js stream, and you can also easily [create your own](https://github.com/rprieto/freeloader-stream).
 
 ```js
 require('freeloader-bundle').global();
@@ -52,15 +54,20 @@ emit(r)
 Which outputs something like:
 
 ```bash
-..........................................................................................................................
+............................................................
+....................................................
 
 Waiting for pending requests to finish...
 
-Response count =  377
+Response count = 112
+
 Response times
-  min =  16ms
-  avg =  44ms
-  max =  82ms
+  Min             =  16ms
+  Max             = 182ms
+  Mean            =  66ms
+  Median          =  58ms
+  75th percentile =  82ms
+  95th percentile = 150ms
 ```
 
 The test suite will end:
