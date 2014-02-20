@@ -1,6 +1,6 @@
 {
   "name": "freeloader",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Stream-based HTTP load testing framework",
   "author": "Romain Prieto",
   "license": "MIT",
