@@ -72,9 +72,21 @@ Response times
 
 The test suite will end:
 
-- when every request has received a response
+- when every request has been sent
 - or when you press `Ctrl-C`
 - or when a module adds its own stopping condition
+
+Test pipelines can easily be included in a CI test suite:
+
+```js
+it('generates load test reports', function(done) {
+  emit(r1)
+  .pipe(times(50))
+  .pipe(jsonSummary('./report.json'))
+  .pipe(callback(done))
+  .pipe(send());
+});
+```
 
 ## Joining streams
 
