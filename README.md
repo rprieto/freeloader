@@ -2,14 +2,17 @@
 
 Just a super easy load-testing framework.
 
+![logo](https://raw.github.com/rprieto/freeloader/master/freeloader.jpg)
+
 - no complex GUI to get lost in
 - load tests == code, and yes you should check them in :)
 - easy to plug-in to your CI server
 - get started in seconds
 
+## Getting started
+
 [![NPM](https://nodei.co/npm/freeloader.svg)](http://www.npmjs.org/package/freeloader)
 
-## Getting started
 
 Freeloader uses 4 basic keywords:
 
