@@ -13,7 +13,6 @@ Just a super easy load-testing framework.
 
 [![NPM](https://nodei.co/npm/freeloader.svg)](http://www.npmjs.org/package/freeloader)
 
-
 Freeloader uses 4 basic keywords:
 
 - `request` to create an HTTP request using [unirest](https://github.com/mashape/unirest-nodejs)
@@ -27,57 +26,49 @@ The simplest test looks like:
 require('freeloader').global();
 
 // See unirest documentation for all the options (headers, file uploads...)
-var r = request.get('http://localhost:3000/people')
+var r = request.get('http://localhost:3000/hello')
                .header('Accept', 'application/json');
 
 emit(r).pipe(send());
 ```
 
-That's it! This test sends a single HTTP request, and finishes as soon as the response is received.
+That's it! This test sends a single HTTP request, and finishes straight away.
+In general, test suites automatically end:
+
+- when every request has been sent
+- or when you press `Ctrl-C`
+- or when a module adds its own stopping condition
 
 ## Building a pipeline
 
-It becomes a lot more interesting when we start building a pipeline. Each step in the pipeline has access to all requests & responses. They can modify payloads, generate more requests, or collect data for reporting.
+It becomes a lot more interesting when we build a pipeline.
+
+Each step in the pipeline has access to all requests & responses. They can modify payloads, generate more requests, or collect data for reporting.
 
 [freeloader-bundle](http://github.com/rprieto/freeloader-bundle) contains a lot of useful modules to get started. Each module is an instance of a Node.js stream, and you can also easily [create your own](https://github.com/rprieto/freeloader-stream).
 
 ```js
+require('freeloader').global();
 require('freeloader-bundle').global();
 
+var r = request.get('http://localhost:3000/hello')
+               .header('Accept', 'application/json');
+
 emit(r)
-.pipe(stopTimer('30s'))
 .pipe(concurrent(50))
-.pipe(transform(randomData))
-.pipe(progressDots())
+.pipe(stopTimer('30s'))
+.pipe(requestDots())
+.pipe(responseDots())
 .pipe(consoleSummary())
-.pipe(responseTimeGraph('./graph.jpg'))
+.pipe(consoleCharts())
 .pipe(send())
 ```
 
 Which outputs something like:
 
-```bash
-............................................................
-....................................................
+![screenshot](https://raw.github.com/rprieto/freeloader/master/screenshot.png)
 
-Waiting for pending requests to finish...
-
-Response count = 112
-
-Response times
-  Min             =  16ms
-  Max             = 182ms
-  Mean            =  66ms
-  Median          =  58ms
-  75th percentile =  82ms
-  95th percentile = 150ms
-```
-
-The test suite will end:
-
-- when every request has been sent
-- or when you press `Ctrl-C`
-- or when a module adds its own stopping condition
+## CI or unit tests
 
 Test pipelines can easily be included in a CI test suite:
 
@@ -93,23 +84,13 @@ it('generates load test reports', function(done) {
 
 ## Joining streams
 
-Streams can also be joined for more complex scenarios. Here are a few examples:
-
-- Emit 2 different requests with a total concurrency of 50
-
-```js
-join(emit(r1), emit(r2))
-.pipe(concurrent(50))
-.pipe(summary())
-.pipe(send());
-```
+Streams can also be joined for more complex scenarios.
 
 - Emit 2 different requests with a concurrency of 50 each
 
 ```js
-var s1 = emit(r1).pipe(concurrent(50));
-var s2 = emit(r2).pipe(concurrent(50));
-join(s1, s2)
+join(emit(r1), emit(r2))
+.pipe(concurrent(50))
 .pipe(summary())
 .pipe(send());
 ```
