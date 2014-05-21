@@ -96,3 +96,15 @@ join(emit(r1), emit(r2))
 ```
 
 It's up to each reporter to either give global stats, or group the report by request URL.
+
+## Complex requests
+
+The `request` object is a [unirest](https://github.com/mashape/unirest-nodejs) object, which means you can configure it to set HTTP headers, custom payloads, SSL certificates, etc...
+
+```js
+var r = request.post('https://my.api.com/do/the/things')
+               .set('Content-Type', 'application/json')
+               .send({hello: 'world'})
+               .secureProtocol('SSLv3_client_method')
+               .strictSSL(false)
+```
